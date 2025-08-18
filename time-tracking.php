@@ -1,5 +1,8 @@
 <?php 
 session_start();
+// Монголын цагийн бүс тохируулах
+date_default_timezone_set('Asia/Ulaanbaatar');
+
 if (!isset($_SESSION['id']) || !isset($_SESSION['role'])) {
     $em = "Анх удаа нэвтэрч байна";
     header("Location: login.php?error=$em");

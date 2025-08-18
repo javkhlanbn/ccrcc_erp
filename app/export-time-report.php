@@ -1,5 +1,8 @@
 <?php
 session_start();
+// Монголын цагийн бүс тохируулах
+date_default_timezone_set('Asia/Ulaanbaatar');
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
     die("Access denied");
 }
@@ -17,7 +20,7 @@ $time_reports = get_all_users_time_report($conn, $date_from, $date_to);
 
 if ($user_filter) {
     $time_reports = array_filter($time_reports, function($report) use ($user_filter) {
-        return stripos($report['full_name'], $user_filter) !== false;
+        return $report['id'] == $user_filter;
     });
 }
 

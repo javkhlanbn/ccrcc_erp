@@ -467,6 +467,16 @@ tr.urgent td, tr.overdue td {
 
 /* Dropdown menu улам тод харагдуулах */
 
+/* Weekly report icon засвар */
+.fa-calendar-week:before {
+    content: "\f273";
+}
+
+/* Calendar day icon засвар */
+.fa-calendar-day:before {
+    content: "\f133";
+}
+
 .dropdown-menu li a {
     position: relative;
 }

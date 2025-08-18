@@ -48,6 +48,12 @@
 				   </a>
 			   </li>
 			   <li>
+				   <a href="weekly-report.php" class="<?php if(basename($_SERVER['PHP_SELF'])=='weekly-report.php') echo 'active'; ?>">
+					   <i class="fa fa-calendar-week" aria-hidden="true"></i>
+					   <span>7 хоногийн тайлан</span>
+				   </a>
+			   </li>
+			   <li>
 				   <a href="leave-request.php">
 					   <i class="fa fa-calendar" aria-hidden="true"></i>
 					   <span>Чөлөөний хүсэлт</span>
@@ -112,6 +118,12 @@
 				   <a href="admin-time-tracking.php" class="<?php if(basename($_SERVER['PHP_SELF'])=='admin-time-tracking.php') echo 'active'; ?>">
 					   <i class="fa fa-clock-o" aria-hidden="true"></i>
 					   <span>Цагийн удирдлага</span>
+				   </a>
+			   </li>
+			   <li>
+				   <a href="admin-weekly-reports.php" class="<?php if(basename($_SERVER['PHP_SELF'])=='admin-weekly-reports.php') echo 'active'; ?>">
+					   <i class="fa fa-calendar-week" aria-hidden="true"></i>
+					   <span>7 хоногийн тайлан</span>
 				   </a>
 			   </li>
 			   <li>

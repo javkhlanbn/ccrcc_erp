@@ -1,5 +1,8 @@
 <?php
 
+// Монголын цагийн бүс тохируулах
+date_default_timezone_set('Asia/Ulaanbaatar');
+
 // Time Tracking Model Functions
 
 function start_work_time($conn, $user_id) {

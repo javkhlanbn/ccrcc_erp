@@ -1,5 +1,8 @@
 <?php 
 session_start();
+// Монголын цагийн бүс тохируулах
+date_default_timezone_set('Asia/Ulaanbaatar');
+
 if (!isset($_SESSION['id']) || !isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
     $em = "Зөвхөн админ хандах боломжтой";
     header("Location: login.php?error=$em");
@@ -20,7 +23,7 @@ $time_reports = get_all_users_time_report($conn, $date_from, $date_to);
 // Хэрэв хэрэглэгчийн шүүлтүүр байгаа бол
 if ($user_filter) {
     $time_reports = array_filter($time_reports, function($report) use ($user_filter) {
-        return stripos($report['full_name'], $user_filter) !== false;
+        return $report['id'] == $user_filter;
     });
 }
 
@@ -102,6 +105,17 @@ $employees = array_filter($all_employees, function($user) {
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
+            min-width: 180px;
+        }
+        
+        .form-group select {
+            background: white;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><polygon fill='%23666' points='6,8 2,4 10,4'/></svg>");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 30px;
         }
         
         .filter-btn {
@@ -336,7 +350,15 @@ $employees = array_filter($all_employees, function($user) {
                 
                 <div class="form-group">
                     <label for="user_filter">Ажилтан:</label>
-                    <input type="text" id="user_filter" name="user_filter" placeholder="Ажилтны нэр..." value="<?= htmlspecialchars($user_filter) ?>">
+                    <select id="user_filter" name="user_filter">
+                        <option value="">-- Бүх ажилчид --</option>
+                        <?php foreach ($employees as $employee): ?>
+                            <option value="<?= $employee['id'] ?>" 
+                                    <?= $user_filter == $employee['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($employee['full_name']) ?> (@<?= htmlspecialchars($employee['username']) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 
                 <div class="form-group">
@@ -517,6 +539,7 @@ $employees = array_filter($all_employees, function($user) {
             // Хэрэв огноо оруулаагүй бол сүүлийн 30 хоногийг харуулах
             const dateFrom = document.getElementById('date_from');
             const dateTo = document.getElementById('date_to');
+            const userFilter = document.getElementById('user_filter');
             
             if (!dateFrom.value) {
                 const thirtyDaysAgo = new Date();
@@ -528,6 +551,12 @@ $employees = array_filter($all_employees, function($user) {
                 const today = new Date();
                 dateTo.value = today.toISOString().split('T')[0];
             }
+            
+            // Ажилтан сонгосон үед автоматаар шүүлт хийх
+            userFilter.addEventListener('change', function() {
+                // Form автоматаар submit хийх
+                this.form.submit();
+            });
         });
     </script>
 </body>
