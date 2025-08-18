@@ -203,3 +203,31 @@ function count_my_completed_tasks($conn, $id){
 
 	return $stmt->rowCount();
 }
+
+function get_user_task_report($conn, $user_id, $date_from = '', $date_to = ''){
+	$sql = "SELECT * FROM tasks WHERE assigned_to = ?";
+	$params = [$user_id];
+	
+	if ($date_from && $date_to) {
+		$sql .= " AND created_at BETWEEN ? AND ?";
+		$params[] = $date_from . ' 00:00:00';
+		$params[] = $date_to . ' 23:59:59';
+	} elseif ($date_from) {
+		$sql .= " AND created_at >= ?";
+		$params[] = $date_from . ' 00:00:00';
+	} elseif ($date_to) {
+		$sql .= " AND created_at <= ?";
+		$params[] = $date_to . ' 23:59:59';
+	}
+	
+	$sql .= " ORDER BY created_at DESC";
+	
+	$stmt = $conn->prepare($sql);
+	$stmt->execute($params);
+
+	if($stmt->rowCount() > 0){
+		$tasks = $stmt->fetchAll();
+	}else $tasks = [];
+
+	return $tasks;
+}

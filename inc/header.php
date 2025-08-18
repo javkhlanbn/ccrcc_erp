@@ -37,6 +37,20 @@
 
        $("#notificationNum").load("app/notification-count.php");
        $("#notifications").load("app/notification.php");
+       
+       // Check for unread chat messages
+       function checkUnreadMessages() {
+           $.get("app/get_unread_count.php", function(data) {
+               if (data.count > 0) {
+                   $("#chatNotification").text(data.count).show();
+               } else {
+                   $("#chatNotification").hide();
+               }
+           }, "json");
+       }
+       
+       checkUnreadMessages();
+       setInterval(checkUnreadMessages, 5000); // Check every 5 seconds
 
    });
 </script>

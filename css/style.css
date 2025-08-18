@@ -42,6 +42,19 @@
 .header .notification:hover i{
 	color: #127b8e;
 }
+.notification-badge {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	background: #dc3545;
+	color: #fff;
+	border-radius: 10px;
+	padding: 2px 6px;
+	font-size: 10px;
+	min-width: 16px;
+	text-align: center;
+	font-weight: bold;
+}
 .notification-bar {
 	display: none;
 	width: 90%;
@@ -85,7 +98,7 @@
 
 }
 .side-bar {
-	width: 250px;
+	width: 290px;
 	background: #262931;
 	min-height: 100vh;
 	transition: 500ms width;
@@ -110,6 +123,11 @@
 }
 .side-bar ul li:hover {
 	background: #127b8e;
+}
+
+/* Dropdown элементүүдэд hover эффект үгүй болгох */
+.side-bar ul li.dropdown:hover {
+	background: transparent;
 }
 
 .side-bar ul li a {
@@ -330,4 +348,140 @@ tr.warning td {
 
 tr.urgent td, tr.overdue td {
     background-color: #f8d7da; /* Улаан */
+}
+
+/* Dropdown цэсний стиль */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-decoration: none;
+    color: #eee;
+    cursor: pointer;
+    letter-spacing: 1px;
+    padding-right: 15px;
+}
+
+.dropdown-toggle:hover {
+    color: #eee;
+}
+
+.dropdown-toggle::after {
+    content: '\f0d7'; /* FontAwesome caret-down */
+    font-family: FontAwesome;
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    font-size: 12px;
+    color: #ccc;
+}
+
+.dropdown.open .dropdown-toggle::after {
+    transform: rotate(180deg);
+    color: #127b8e;
+}
+
+.dropdown-menu {
+    display: none;
+    background: #1a1b22;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-radius: 0 8px 8px 8px;
+    box-shadow: 
+        inset 3px 0 0 #127b8e,
+        0 4px 8px rgba(0,0,0,0.2);
+    animation: slideDown 0.3s ease;
+    overflow: hidden;
+    border: 1px solid #2a2b32;
+    border-top: none;
+    border-left: none;
+}
+
+@keyframes slideDown {
+    0% {
+        opacity: 0;
+        max-height: 0;
+    }
+    100% {
+        opacity: 1;
+        max-height: 200px;
+    }
+}
+
+.dropdown.open .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu li {
+    padding: 0;
+    font-size: 14px;
+    border-bottom: 1px solid #2a2b32;
+}
+
+.dropdown-menu li:last-child {
+    border-bottom: none;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+.dropdown-menu li a {
+    padding: 12px 20px 12px 40px;
+    color: #bbb;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+}
+
+.dropdown-menu li:hover {
+    background: #127b8e;
+}
+
+.dropdown-menu li:hover a {
+    color: #fff;
+    border-left-color: #fff;
+    padding-left: 42px;
+}
+
+.dropdown-menu li a i {
+    padding-right: 10px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+/* Dropdown parent hover effect */
+.dropdown:hover .dropdown-toggle {
+    background: rgba(18, 123, 142, 0.1);
+}
+
+.dropdown.open > a {
+    background: #127b8e !important;
+    color: #fff !important;
+}
+
+/* Dropdown menu улам тод харагдуулах */
+
+.dropdown-menu li a {
+    position: relative;
+}
+
+.dropdown-menu li a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background 0.3s ease;
+}
+
+.dropdown-menu li:hover a::before {
+    background: #fff;
 }

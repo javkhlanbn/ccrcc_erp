@@ -12,6 +12,18 @@ function get_all_users($conn){
 	return $users;
 }
 
+function get_all_users_for_chat($conn){
+	$sql = "SELECT * FROM users ORDER BY role DESC, full_name ASC";
+	$stmt = $conn->prepare($sql);
+	$stmt->execute([]);
+
+	if($stmt->rowCount() > 0){
+		$users = $stmt->fetchAll();
+	}else $users = 0;
+
+	return $users;
+}
+
 
 function insert_user_with_image($conn, $data){
 	$sql = "INSERT INTO users (full_name, username, password, role, profile_image) VALUES(?,?,?,?,?)";
