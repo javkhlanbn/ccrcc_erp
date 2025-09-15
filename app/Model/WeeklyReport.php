@@ -116,16 +116,26 @@ function get_user_weekly_reports($conn, $user_id, $limit = 10) {
     return $stmt->fetchAll();
 }
 
-function get_all_weekly_reports($conn, $status = null) {
+function get_all_weekly_reports($conn, $status = null, $week_filter = null) {
     $where_clause = '';
     $params = [];
-    
+    $conditions = [];
+
     if ($status) {
-        $where_clause = "WHERE wr.status = ?";
+        $conditions[] = "wr.status = ?";
         $params[] = $status;
     }
-    
-    $sql = "SELECT wr.*, 
+
+    if ($week_filter) {
+        $conditions[] = "wr.week_start_date = ?";
+        $params[] = $week_filter;
+    }
+
+    if (!empty($conditions)) {
+        $where_clause = "WHERE " . implode(" AND ", $conditions);
+    }
+
+    $sql = "SELECT wr.*,
                    u.full_name as employee_name,
                    u.username as employee_username,
                    admin.full_name as reviewed_by_name,
@@ -135,7 +145,7 @@ function get_all_weekly_reports($conn, $status = null) {
             LEFT JOIN users admin ON wr.reviewed_by = admin.id
             $where_clause
             ORDER BY wr.submitted_at DESC, wr.week_start_date DESC";
-    
+
     $stmt = $conn->prepare($sql);
     $stmt->execute($params);
     return $stmt->fetchAll();

@@ -245,12 +245,15 @@ $month_summary = get_user_time_summary($conn, $user_id, 'month');
                     <i class="fa fa-clock-o"></i> Өнөөдөр ажил эхлүүлээгүй байна
                 </div>
                 <p>Өнөөдөр ажил эхлэх товчийг дарснаар таны цаг бүртгэгдэнэ.</p>
-                <form method="POST" action="app/time-action.php" style="display:inline;">
+                <form method="POST" action="app/time-action.php" style="display:inline;" id="startForm" onsubmit="return validateStartLocation()">
                     <input type="hidden" name="action" value="start">
-                    <button type="submit" class="time-button start-btn">
+                    <input type="hidden" name="latitude" id="startLatitude">
+                    <input type="hidden" name="longitude" id="startLongitude">
+                    <button type="submit" class="time-button start-btn" id="startButton" disabled>
                         🟢 Цаг эхлүүлэх
                     </button>
                 </form>
+                <div id="startLocationStatus" style="color: red; font-weight: bold; margin-top: 5px;"></div>
                 
             <?php elseif ($today_status['status'] == 'in_progress'): ?>
                 <div class="status-text">
@@ -262,12 +265,15 @@ $month_summary = get_user_time_summary($conn, $user_id, 'month');
                 <button class="time-button disabled-btn" disabled>
                     🟢 Цаг эхлүүлэх
                 </button>
-                <form method="POST" action="app/time-action.php" style="display:inline;">
+                <form method="POST" action="app/time-action.php" style="display:inline;" id="endForm">
                     <input type="hidden" name="action" value="end">
-                    <button type="submit" class="time-button end-btn">
+                    <input type="hidden" name="latitude" id="endLatitude">
+                    <input type="hidden" name="longitude" id="endLongitude">
+                    <button type="submit" class="time-button end-btn" id="endButton" disabled>
                         🔴 Цаг дуусгах
                     </button>
                 </form>
+                <div id="endLocationStatus" style="color: red; font-weight: bold; margin-top: 5px;"></div>
                 
             <?php else: ?>
                 <div class="status-text">
@@ -377,6 +383,121 @@ $month_summary = get_user_time_summary($conn, $user_id, 'month');
     </div>
     
     <script>
+        // Fixed office location coordinates (Ulaanbaatar, Mongolia)
+        const OFFICE_LATITUDE = 47.88548759055816;
+        const OFFICE_LONGITUDE = 106.91142086440605;
+        const ALLOWED_RADIUS_METERS = 100;
+
+        // Calculate distance between two coordinates using Haversine formula
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const earthRadius = 6371000; // Earth radius in meters
+
+            const latDelta = Math.toRadians(lat2 - lat1);
+            const lonDelta = Math.toRadians(lon2 - lon1);
+
+            const a = Math.sin(latDelta/2) * Math.sin(latDelta/2) +
+                     Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                     Math.sin(lonDelta/2) * Math.sin(lonDelta/2);
+
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return earthRadius * c;
+        }
+
+        // Convert degrees to radians
+        Math.toRadians = function(degrees) {
+            return degrees * (Math.PI / 180);
+        };
+
+        // Get user's current location
+        function getLocation(formType) {
+            const statusElement = document.getElementById(formType + 'LocationStatus');
+            const buttonElement = document.getElementById(formType + 'Button');
+            const latitudeElement = document.getElementById(formType + 'Latitude');
+            const longitudeElement = document.getElementById(formType + 'Longitude');
+
+            if (navigator.geolocation) {
+                statusElement.textContent = 'Байршил тодорхойлох...';
+                buttonElement.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const userLat = position.coords.latitude;
+                        const userLon = position.coords.longitude;
+
+                        // Calculate distance from office
+                        const distance = calculateDistance(userLat, userLon, OFFICE_LATITUDE, OFFICE_LONGITUDE);
+
+                        // Set form values
+                        latitudeElement.value = userLat;
+                        longitudeElement.value = userLon;
+
+                        if (distance <= ALLOWED_RADIUS_METERS) {
+                            statusElement.textContent = '✅ Байршил зөвшөөрөгдсөн (Зай: ' + Math.round(distance) + 'м)';
+                            statusElement.style.color = 'green';
+                            buttonElement.disabled = false;
+                        } else {
+                            statusElement.textContent = '❌ Та өөр газраас бүртгүүлэх гэж оролдох үед тэр газраа очиж байж цагаа эхлүүлнэ үү! Зай: ' + Math.round(distance) + 'м (Зөвшөөрөгдсөн: ' + ALLOWED_RADIUS_METERS + 'м)';
+                            statusElement.style.color = 'red';
+                            buttonElement.disabled = true;
+                        }
+                    },
+                    function(error) {
+                        let errorMessage = 'Байршил тодорхойлох боломжгүй: ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage += 'Хэрэглэгч байршил хуваалцахыг зөвшөөрөөгүй эсвэл блоклогдсон байна.<br>Браузерийн тохиргооноос байршил зөвшөөрлийг шинэчлэн тохируулна уу.<br><button onclick="getLocation(\'' + formType + '\')" style="margin-top: 5px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">Байршил зөвшөөрөх</button>';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage += 'Байршил мэдээлэл байхгүй.';
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage += 'Байршил тодорхойлох хугацаа хэтэрсэн.';
+                                break;
+                            default:
+                                errorMessage += 'Үл мэдэгдэх алдаа.';
+                                break;
+                        }
+                        statusElement.innerHTML = errorMessage;
+                        statusElement.style.color = 'red';
+                        buttonElement.disabled = true;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000 // 5 minutes
+                    }
+                );
+            } else {
+                statusElement.textContent = 'Энэ браузер байршил дэмжихгүй.';
+                statusElement.style.color = 'red';
+                buttonElement.disabled = true;
+            }
+        }
+
+        // Initialize location checking when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if start button exists
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                getLocation('start');
+                // Periodically re-check location for start button
+                setInterval(function() {
+                    getLocation('start');
+                }, 30000); // Check every 30 seconds
+            }
+
+            // Check if end button exists
+            const endButton = document.getElementById('endButton');
+            if (endButton) {
+                getLocation('end');
+                // Periodically re-check location for end button
+                setInterval(function() {
+                    getLocation('end');
+                }, 30000); // Check every 30 seconds
+            }
+        });
+
         // Одоогийн цагийг харуулах
         function updateCurrentTime() {
             const now = new Date();
@@ -388,11 +509,21 @@ $month_summary = get_user_time_summary($conn, $user_id, 'month');
             });
             document.getElementById('currentTime').textContent = timeString;
         }
-        
+
         // Цагийг секунд бүр шинэчлэх
         updateCurrentTime();
         setInterval(updateCurrentTime, 1000);
-        
+
+        // Validate location on start form submit
+        function validateStartLocation() {
+            const startButton = document.getElementById('startButton');
+            if (startButton.disabled) {
+                alert('Та 100 метрийн радиус дотор байхгүй байна. Цаг эхлүүлэх боломжгүй.');
+                return false;
+            }
+            return true;
+        }
+
         // Автомат refresh - 5 минут тутам хуудсыг шинэчлэх
         setTimeout(function() {
             location.reload();

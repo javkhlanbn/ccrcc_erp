@@ -13,8 +13,30 @@ include "DB_connection.php";
 include "app/Model/WeeklyReport.php";
 include "app/Model/User.php";
 
-$status_filter = $_GET['status'] ?? 'submitted';
-$reports = get_all_weekly_reports($conn, $status_filter);
+$status_filter = $_GET['status'] ?? 'all';
+$week_filter = $_GET['week'] ?? '';
+
+$status_param = ($status_filter == 'all') ? null : $status_filter;
+
+// Бүх тайлангуудыг авах (шүүлтүүргүй) - available_weeks болон stats-д зориулсан
+$all_reports_for_meta = get_all_weekly_reports($conn);
+
+// Тайлангуудыг шүүж авах
+$reports = get_all_weekly_reports($conn, $status_param, $week_filter);
+
+// Долоо хоногуудыг цуглуулах
+$available_weeks = [];
+foreach ($all_reports_for_meta as $report) {
+    $week_key = $report['week_start_date'];
+    if (!isset($available_weeks[$week_key])) {
+        $available_weeks[$week_key] = [
+            'start' => $report['week_start_date'],
+            'end' => $report['week_end_date'],
+            'range' => $report['week_range']
+        ];
+    }
+}
+krsort($available_weeks); // Сүүлийн долоо хоногоос эхлэх
 
 ?>
 <!DOCTYPE html>
@@ -270,6 +292,25 @@ $reports = get_all_weekly_reports($conn, $status_filter);
                         <i class="fa fa-list"></i> Бүгд
                     </a>
                 </div>
+
+                <!-- Долоо хоногийн шүүлтүүр -->
+                <?php if (!empty($available_weeks)): ?>
+                    <div style="margin-top: 20px;">
+                        <h4><i class="fa fa-calendar-week"></i> 7 хоногоор шүүх</h4>
+                        <div class="filter-tabs">
+                            <?php foreach ($available_weeks as $week_key => $week): ?>
+                                <a href="?week=<?= urlencode($week_key) ?>" class="filter-tab <?= $week_filter == $week_key ? 'active' : '' ?>" title="<?= $week['range'] ?>">
+                                    <i class="fa fa-calendar"></i> <?= date('m/d', strtotime($week['start'])) ?> - <?= date('m/d', strtotime($week['end'])) ?>
+                                </a>
+                            <?php endforeach; ?>
+                            <?php if ($week_filter): ?>
+                                <a href="?" class="filter-tab" style="background: #dc3542; color: white;">
+                                    <i class="fa fa-times"></i> Шүүлтүүр арилгах
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
             
             <!-- Тайлангууд -->
@@ -278,10 +319,10 @@ $reports = get_all_weekly_reports($conn, $status_filter);
                     <div class="table-header">
                         <h3><i class="fa fa-table"></i> Тайлангуудын жагсаалт (<?= count($reports) ?> тайлан)</h3>
                         <div style="margin-top:10px;">
-                            <a href="app/export-weekly-reports.php?type=excel<?= $status_filter ? '&status=' . urlencode($status_filter) : '' ?>" class="btn-sm" style="background:#2196F3;color:white;">
+                            <a href="app/export-weekly-reports.php?type=excel<?= ($status_filter && $status_filter != 'all') ? '&status=' . urlencode($status_filter) : '' ?><?= $week_filter ? '&week=' . urlencode($week_filter) : '' ?>" class="btn-sm" style="background:#2196F3;color:white;">
                                 <i class="fa fa-file-excel"></i> Excel татах
                             </a>
-                            <a href="app/export-weekly-reports.php?type=word<?= $status_filter ? '&status=' . urlencode($status_filter) : '' ?>" class="btn-sm" style="background:#4CAF50;color:white;">
+                            <a href="app/export-weekly-reports.php?type=word<?= ($status_filter && $status_filter != 'all') ? '&status=' . urlencode($status_filter) : '' ?><?= $week_filter ? '&week=' . urlencode($week_filter) : '' ?>" class="btn-sm" style="background:#4CAF50;color:white;">
                                 <i class="fa fa-file-word"></i> Word татах
                             </a>
                         </div>
@@ -329,7 +370,7 @@ $reports = get_all_weekly_reports($conn, $status_filter);
                                                 <i class="fa fa-eye"></i>
                                             </a>
                                             <?php if ($report['status'] == 'submitted'): ?>
-                                                <a href="weekly-report-review.php?id=<?= $report['id'] ?>" 
+                                                <a href="weekly-report-detail.php?id=<?= $report['id'] ?>"#review-section
                                                    class="btn-sm btn-review" title="Хянах">
                                                     <i class="fa fa-check"></i>
                                                 </a>

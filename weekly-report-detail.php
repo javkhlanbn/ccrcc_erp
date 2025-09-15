@@ -353,7 +353,7 @@ if ($_POST && isset($_POST['admin_feedback'])) {
             </div>
             
             <!-- Админы санал хүсэлт -->
-            <div class="feedback-section">
+            <div id="review-section" class="feedback-section">
                 <h3><i class="fa fa-comment"></i> Админы санал хүсэлт</h3>
                 
                 <?php if ($report['admin_feedback']): ?>

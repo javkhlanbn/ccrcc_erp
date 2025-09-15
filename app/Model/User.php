@@ -38,9 +38,17 @@ function update_user($conn, $data){
 }
 
 function delete_user($conn, $data){
-	$sql = "DELETE FROM users WHERE id=? AND role=?";
-	$stmt = $conn->prepare($sql);
-	$stmt->execute($data);
+
+		// Delete related messages where user is receiver or sender
+		$user_id = $data[0];
+		$delete_messages_sql = "DELETE FROM messages WHERE receiver_id=? OR sender_id=?";
+		$delete_messages_stmt = $conn->prepare($delete_messages_sql);
+		$delete_messages_stmt->execute([$user_id, $user_id]);
+
+		// Now delete the user
+		$sql = "DELETE FROM users WHERE id=? AND role=?";
+		$stmt = $conn->prepare($sql);
+		$stmt->execute($data);
 }
 
 
