@@ -23,6 +23,34 @@ function get_current_week_dates() {
     ];
 }
 
+/**
+ * Generate a list of recent weeks for selection
+ * @param int $num_weeks Number of weeks to generate
+ * @return array List of weeks with start and end dates
+ */
+function get_recent_weeks($num_weeks = 10) {
+    $weeks = [];
+    $today = new DateTime();
+    $day_of_week = $today->format('N'); // 1=Monday, 7=Sunday
+    $current_monday = clone $today;
+    $current_monday->modify('-' . ($day_of_week - 1) . ' days');
+
+    for ($i = 0; $i < $num_weeks; $i++) {
+        $week_start = clone $current_monday;
+        $week_start->modify('-' . $i * 7 . ' days');
+        $week_end = clone $week_start;
+        $week_end->modify('+6 days');
+
+        $weeks[] = [
+            'start' => $week_start->format('Y-m-d'),
+            'end' => $week_end->format('Y-m-d'),
+            'label' => $week_start->format('Y-m-d') . ' - ' . $week_end->format('Y-m-d')
+        ];
+    }
+
+    return $weeks;
+}
+
 function get_week_report($conn, $user_id, $week_start_date) {
     $sql = "SELECT * FROM weekly_reports 
             WHERE user_id = ? AND week_start_date = ?";

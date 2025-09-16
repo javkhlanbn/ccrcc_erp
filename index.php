@@ -28,6 +28,7 @@ if (isset($_SESSION['role']) && isset($_SESSION['id']) ) {
 <!DOCTYPE html>
 <html>
 <head>
+<link rel="icon" type="image/png" href="img/user.png">
 <title>Удирдах самбар</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" href="css/style.css">

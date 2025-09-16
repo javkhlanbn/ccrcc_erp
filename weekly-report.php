@@ -15,8 +15,26 @@ include "app/Model/WeeklyReport.php";
 $user_id = $_SESSION['id'];
 $current_week = get_current_week_dates();
 
-// Одоогийн долоо хоногийн тайлан шалгах
-$current_report = get_week_report($conn, $user_id, $current_week['start']);
+// Сонгосон долоо хоногийг авах (GET параметрээс эсвэл одоогийн долоо хоног)
+$selected_week_start = $_GET['week'] ?? $current_week['start'];
+$selected_week = get_recent_weeks(10);
+$selected_week_data = null;
+
+foreach ($selected_week as $week) {
+    if ($week['start'] === $selected_week_start) {
+        $selected_week_data = $week;
+        break;
+    }
+}
+
+// Хэрэв сонгосон долоо хоног олдсонгүй бол одоогийн долоо хоногийг ашиглах
+if (!$selected_week_data) {
+    $selected_week_data = $current_week;
+    $selected_week_start = $current_week['start'];
+}
+
+// Сонгосон долоо хоногийн тайлан шалгах
+$current_report = get_week_report($conn, $user_id, $selected_week_start);
 
 // Өмнөх тайлангуудыг авах
 $user_reports = get_user_weekly_reports($conn, $user_id, 10);
@@ -270,10 +288,28 @@ $user_reports = get_user_weekly_reports($conn, $user_id, 10);
                 </div>
             <?php endif; ?>
 
-            <!-- Одоогийн долоо хоногийн тайлан -->
+            <!-- Долоо хоног сонгох -->
+            <div class="week-selector-section" style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                <h3><i class="fa fa-calendar-check"></i> Тайлан үүсгэх долоо хоног сонгох</h3>
+                <form method="GET" action="weekly-report.php" style="margin-top: 15px;">
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                        <label for="week_select" style="font-weight: bold;">Долоо хоног:</label>
+                        <select name="week" id="week_select" onchange="this.form.submit()" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; min-width: 300px;">
+                            <?php foreach ($selected_week as $week): ?>
+                                <option value="<?= $week['start'] ?>" <?= ($week['start'] === $selected_week_start) ? 'selected' : '' ?>>
+                                    <?= $week['label'] ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <small style="color: #666;">Өмнөх долоо хоногуудыг сонгож тайлан үүсгэх боломжтой</small>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Сонгосон долоо хоногийн тайлан -->
             <div class="current-week-section">
                 <div class="week-info">
-                    <h3><i class="fa fa-calendar"></i> Энэ долоо хоног: <?= date('Y-m-d', strtotime($current_week['start'])) ?> - <?= date('Y-m-d', strtotime($current_week['end'])) ?></h3>
+                    <h3><i class="fa fa-calendar"></i> Сонгосон долоо хоног: <?= date('Y-m-d', strtotime($selected_week_data['start'])) ?> - <?= date('Y-m-d', strtotime($selected_week_data['end'])) ?></h3>
                     <?php if ($current_report): ?>
                         <p><strong>Статус:</strong>
                             <span class="status-badge status-<?= $current_report['status'] ?>">
@@ -290,8 +326,8 @@ $user_reports = get_user_weekly_reports($conn, $user_id, 10);
                 </div>
 
                 <form method="POST" action="app/save-weekly-report.php" class="report-form">
-                    <input type="hidden" name="week_start_date" value="<?= $current_week['start'] ?>">
-                    <input type="hidden" name="week_end_date" value="<?= $current_week['end'] ?>">
+                    <input type="hidden" name="week_start_date" value="<?= $selected_week_data['start'] ?>">
+                    <input type="hidden" name="week_end_date" value="<?= $selected_week_data['end'] ?>">
 
                     <h3><i class="fa fa-clipboard-list"></i> Ажлын тайлан</h3>
 
