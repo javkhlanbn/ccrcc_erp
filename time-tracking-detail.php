@@ -3,7 +3,7 @@ session_start();
 // Монголын цагийн бүс тохируулах
 date_default_timezone_set('Asia/Ulaanbaatar');
 
-if (!isset($_SESSION['id']) || !isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
+if (!isset($_SESSION['id']) || !isset($_SESSION['role']) || ($_SESSION['role'] != 'admin' && $_SESSION['id'] != 42)) {
     $em = "Зөвхөн админ хандах боломжтой";
     header("Location: login.php?error=$em");
     exit();
@@ -429,9 +429,11 @@ $time_entries = $stmt->fetchAll();
             <div class="entries-section">
                 <div class="section-header">
                     <h3><i class="fa fa-clock-o"></i> Цагийн бүртгэлийн түүх (<?= $total_days ?> өдөр)</h3>
+                    <?php if ($_SESSION['id'] != 42): ?>
                     <a href="#" class="add-entry-btn" onclick="addNewEntry()">
                         <i class="fa fa-plus"></i> Шинэ бүртгэл
                     </a>
+                    <?php endif; ?>
                 </div>
                 
                 <table class="entries-table">
@@ -487,6 +489,7 @@ $time_entries = $stmt->fetchAll();
                                     <?php endif; ?>
                                 </td>
                                 <td>
+                                    <?php if ($_SESSION['id'] != 42): ?>
                                     <div class="action-buttons">
                                         <button onclick="editEntry(<?= $entry['id'] ?>)" 
                                                 class="btn-sm btn-edit" title="Засах">
@@ -497,6 +500,9 @@ $time_entries = $stmt->fetchAll();
                                             <i class="fa fa-trash"></i>
                                         </button>
                                     </div>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

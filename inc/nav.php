@@ -1,6 +1,6 @@
 <nav class="side-bar">
 			<div class="user-p">
-				<img src="img/user.png">
+				<img src="img/erp logo.png">
 <h4><?php echo isset($_SESSION['full_name']) ? $_SESSION['full_name'] : '@'.$_SESSION['username']; ?></h4>
 			</div>
 			
@@ -18,7 +18,7 @@
 				</li>
 				<li>
 					<a href="my_task.php">
-						<i class="fa fa-tasks" aria-hidden="true"></i>
+						<i class="fa fa-tasks" aria-hidden="true"></i>         
 						<span>Миний даалгавар</span>
 					</a>
 				</li>
@@ -180,11 +180,20 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// Хуудас ачаалагдахад одоогийн хуудасны dropdown-г идэвхжүүлэх
+// Combined DOMContentLoaded event handler
 document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname.split('/').pop();
     const taskPages = ['create_task.php', 'tasks.php', 'task-reports.php'];
-    
+
+    // Remove active class from all links first
+    document.querySelectorAll('#navList a').forEach(function(link) {
+        link.classList.remove('active');
+        link.style.background = '';
+        link.style.color = '';
+        link.style.fontWeight = '';
+    });
+
+    // Handle dropdown pages
     if (taskPages.includes(currentPage)) {
         const taskDropdown = document.querySelector('.dropdown');
         if (taskDropdown) {
@@ -194,8 +203,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 toggle.style.background = '#127b8e';
                 toggle.style.color = '#fff';
             }
-            
-            // Тухайн хуудасны link-г active болгох
+
+            // Highlight the specific dropdown link
             const activeLink = taskDropdown.querySelector(`a[href="${currentPage}"]`);
             if (activeLink) {
                 activeLink.style.background = '#127b8e';
@@ -203,6 +212,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 activeLink.style.fontWeight = 'bold';
             }
         }
+    } else {
+    // Handle regular navigation links
+    // Fix for "Чөлөөний хүсэлт" highlighting incorrectly highlighting "Цагийн удирдлага"
+    let adjustedCurrentPage = currentPage;
+    if (currentPage === 'manage-leave-requests.php') {
+        adjustedCurrentPage = 'manage-leave-requests.php';
+    }
+    const activeLink = document.querySelector(`#navList a[href="${adjustedCurrentPage}"]`);
+    if (activeLink) {
+        activeLink.classList.add('active');
+        activeLink.style.background = '#127b8e';
+        activeLink.style.color = '#fff';
+        activeLink.style.fontWeight = 'bold';
+    }
     }
 });
 </script>

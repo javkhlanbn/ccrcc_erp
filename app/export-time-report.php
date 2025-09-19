@@ -3,13 +3,21 @@ session_start();
 // Монголын цагийн бүс тохируулах
 date_default_timezone_set('Asia/Ulaanbaatar');
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
+if (!isset($_SESSION['role'])) {
     die("Access denied");
 }
 
 include "../DB_connection.php";
 include "Model/TimeTracking.php";
 include "Model/User.php";
+
+// Check permissions
+$current_user = get_user_by_id($conn, $_SESSION['id']);
+$can_download_reports = $current_user && ($current_user['can_download_reports'] ?? 0);
+
+if ($_SESSION['role'] != 'admin' && !$can_download_reports) {
+    die("Access denied");
+}
 
 $type = $_GET['type'] ?? 'excel';
 $date_from = $_GET['date_from'] ?? date('Y-m-d', strtotime('-30 days'));

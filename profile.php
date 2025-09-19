@@ -27,7 +27,7 @@ if (isset($_SESSION['role']) && isset($_SESSION['id']) && $_SESSION['role'] == "
 	<?php if (!empty($user['profile_image'])): ?>
 		<img src="<?=$user['profile_image']?>" alt="Profile Image" style="max-width:120px; border-radius:50%;">
 	<?php else: ?>
-		<img src="img/user.png" alt="Profile Image" style="max-width:120px; border-radius:50%;">
+		<img src="img/erp logo.png" alt="Profile Image" style="max-width:120px; border-radius:50%;">
 	<?php endif; ?>
 </td>
 				</tr>

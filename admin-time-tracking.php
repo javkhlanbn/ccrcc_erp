@@ -3,8 +3,8 @@ session_start();
 // Монголын цагийн бүс тохируулах
 date_default_timezone_set('Asia/Ulaanbaatar');
 
-if (!isset($_SESSION['id']) || !isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
-    $em = "Зөвхөн админ хандах боломжтой";
+if (!isset($_SESSION['id']) || !isset($_SESSION['role']) || ($_SESSION['role'] != 'admin' && !$can_view_all_time)) {
+    $em = "Зөвхөн админ эсвэл зөвшөөрөлтэй хэрэглэгч хандах боломжтой";
     header("Location: login.php?error=$em");
     exit();
 }
@@ -12,6 +12,10 @@ if (!isset($_SESSION['id']) || !isset($_SESSION['role']) || $_SESSION['role'] !=
 include "DB_connection.php";
 include "app/Model/TimeTracking.php";
 include "app/Model/User.php";
+
+// Get current user permissions
+$current_user = get_user_by_id($conn, $_SESSION['id']);
+$can_view_all_time = $current_user && ($current_user['can_view_all_time'] ?? 0);
 
 $date_from = $_GET['date_from'] ?? date('Y-m-d', strtotime('-30 days'));
 $date_to = $_GET['date_to'] ?? date('Y-m-d');
@@ -478,14 +482,16 @@ $employees = array_filter($all_employees, function($user) {
                                     </td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="time-tracking-detail.php?user_id=<?= $report['id'] ?>&date_from=<?= $date_from ?>&date_to=<?= $date_to ?>" 
+                                            <a href="time-tracking-detail.php?user_id=<?= $report['id'] ?>&date_from=<?= $date_from ?>&date_to=<?= $date_to ?>"
                                                class="btn-sm btn-edit" title="Дэлгэрэнгүй харах">
                                                 <i class="fa fa-eye"></i>
                                             </a>
-                                            <button onclick="editUser(<?= $report['id'] ?>)" 
+                                            <?php if ($_SESSION['id'] != 42): ?>
+                                            <button onclick="editUser(<?= $report['id'] ?>)"
                                                     class="btn-sm btn-edit" title="Засах">
                                                 <i class="fa fa-edit"></i>
                                             </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>

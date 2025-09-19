@@ -48,7 +48,7 @@ if (isset($_SESSION['role']) && isset($_SESSION['id']) && $_SESSION['role'] == "
 		  <?php } ?>
 				<div class="input-holder">
 <lable>Бүтэн нэр</lable>
-<input type="text" name="full_name" class="input-1" placeholder="Бүтэн нэр" value="<?=$user['full_name']?>"><br>
+<input type="text" name="full_name" class="input-1" placeholder="Бүтэн нэр" value="<?php echo $user['full_name']; ?>"><br>
 				</div>
 				<div class="input-holder">
 <lable>Хэрэглэгчийн нэр</lable>
@@ -57,6 +57,11 @@ if (isset($_SESSION['role']) && isset($_SESSION['id']) && $_SESSION['role'] == "
 				<div class="input-holder">
 <lable>Нууц үг</lable>
 <input type="text" value="**********" name="password" class="input-1" placeholder="Нууц үг"><br>
+				</div>
+				<div class="input-holder">
+<label>Эрхүүд</label><br>
+<input type="checkbox" name="can_view_all_time" value="1" <?php echo (($user['can_view_all_time'] ?? 0) ? 'checked' : ''); ?>> Бүх ажилчдын цагийг харах<br>
+<input type="checkbox" name="can_download_reports" value="1" <?php echo (($user['can_download_reports'] ?? 0) ? 'checked' : ''); ?>> Цагийн тайлан татаж авах<br>
 				</div>
 				<input type="text" name="id" value="<?=$user['id']?>" hidden>
 

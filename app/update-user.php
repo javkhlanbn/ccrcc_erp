@@ -16,6 +16,8 @@ if (isset($_POST['user_name']) && isset($_POST['password']) && isset($_POST['ful
 	$password = validate_input($_POST['password']);
 	$full_name = validate_input($_POST['full_name']);
 	$id = validate_input($_POST['id']);
+	$can_view_all_time = isset($_POST['can_view_all_time']) ? 1 : 0;
+	$can_download_reports = isset($_POST['can_download_reports']) ? 1 : 0;
 
 
 	if (empty($user_name)) {
@@ -31,18 +33,18 @@ if (isset($_POST['user_name']) && isset($_POST['password']) && isset($_POST['ful
 	    header("Location: ../edit-user.php?error=$em&id=$id");
 	    exit();
 	}else {
-    
+
        include "Model/User.php";
        $password = password_hash($password, PASSWORD_DEFAULT);
 
-       $data = array($full_name, $user_name, $password, "employee", $id, "employee");
+       $data = array($full_name, $user_name, $password, "employee", $can_view_all_time, $can_download_reports, $id, "employee");
        update_user($conn, $data);
 
        $em = "User created successfully";
 	    header("Location: ../edit-user.php?success=$em&id=$id");
 	    exit();
 
-    
+
 	}
 }else {
    $em = "Unknown error occurred";

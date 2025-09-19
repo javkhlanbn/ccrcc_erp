@@ -32,7 +32,7 @@ function insert_user_with_image($conn, $data){
 }
 
 function update_user($conn, $data){
-	$sql = "UPDATE users SET full_name=?, username=?, password=?, role=? WHERE id=? AND role=?";
+	$sql = "UPDATE users SET full_name=?, username=?, password=?, role=?, can_view_all_time=?, can_download_reports=? WHERE id=? AND role=?";
 	$stmt = $conn->prepare($sql);
 	$stmt->execute($data);
 }
