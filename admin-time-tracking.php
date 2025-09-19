@@ -3,19 +3,26 @@ session_start();
 // Монголын цагийн бүс тохируулах
 date_default_timezone_set('Asia/Ulaanbaatar');
 
-if (!isset($_SESSION['id']) || !isset($_SESSION['role']) || ($_SESSION['role'] != 'admin' && !$can_view_all_time)) {
-    $em = "Зөвхөн админ эсвэл зөвшөөрөлтэй хэрэглэгч хандах боломжтой";
-    header("Location: login.php?error=$em");
-    exit();
-}
-
 include "DB_connection.php";
 include "app/Model/TimeTracking.php";
 include "app/Model/User.php";
 
-// Get current user permissions
+// Get current user permissions first
 $current_user = get_user_by_id($conn, $_SESSION['id']);
 $can_view_all_time = $current_user && ($current_user['can_view_all_time'] ?? 0);
+
+// Check access permissions
+if (!isset($_SESSION['id']) || !isset($_SESSION['role'])) {
+    $em = "Нэвтрэх шаардлагатай";
+    header("Location: login.php?error=$em");
+    exit();
+}
+
+if ($_SESSION['role'] != 'admin' && $_SESSION['role'] != 'manager' && !$can_view_all_time) {
+    $em = "Зөвхөн админ, менежер эсвэл зөвшөөрөлтэй хэрэглэгч хандах боломжтой";
+    header("Location: login.php?error=$em");
+    exit();
+}
 
 $date_from = $_GET['date_from'] ?? date('Y-m-d', strtotime('-30 days'));
 $date_to = $_GET['date_to'] ?? date('Y-m-d');

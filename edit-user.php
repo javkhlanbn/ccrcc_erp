@@ -59,8 +59,16 @@ if (isset($_SESSION['role']) && isset($_SESSION['id']) && $_SESSION['role'] == "
 <input type="text" value="**********" name="password" class="input-1" placeholder="Нууц үг"><br>
 				</div>
 				<div class="input-holder">
+<label>Үүрэг</label><br>
+<select name="role" class="input-1" onchange="updatePermissions(this.value)">
+	<option value="employee" <?php echo ($user['role'] == 'employee' ? 'selected' : ''); ?>>Ажилтан</option>
+	<option value="manager" <?php echo ($user['role'] == 'manager' ? 'selected' : ''); ?>>Менежер</option>
+	<option value="admin" <?php echo ($user['role'] == 'admin' ? 'selected' : ''); ?>>Админ</option>
+</select><br>
+				</div>
+				<div class="input-holder">
 <label>Эрхүүд</label><br>
-<input type="checkbox" name="can_view_all_time" value="1" <?php echo (($user['can_view_all_time'] ?? 0) ? 'checked' : ''); ?>> Бүх ажилчдын цагийг харах<br>
+<input type="checkbox" id="can_view_all_time" name="can_view_all_time" value="1" <?php echo (($user['can_view_all_time'] ?? 0) ? 'checked' : ''); ?>> Бүх ажилчдын цагийг харах<br>
 <input type="checkbox" name="can_download_reports" value="1" <?php echo (($user['can_download_reports'] ?? 0) ? 'checked' : ''); ?>> Цагийн тайлан татаж авах<br>
 				</div>
 				<input type="text" name="id" value="<?=$user['id']?>" hidden>
@@ -74,6 +82,23 @@ if (isset($_SESSION['role']) && isset($_SESSION['id']) && $_SESSION['role'] == "
 <script type="text/javascript">
 	var active = document.querySelector("#navList li:nth-child(2)");
 	active.classList.add("active");
+
+	function updatePermissions(role) {
+		const canViewAllTimeCheckbox = document.getElementById('can_view_all_time');
+		if (role === 'manager' || role === 'admin') {
+			canViewAllTimeCheckbox.checked = true;
+		} else if (role === 'employee') {
+			canViewAllTimeCheckbox.checked = false;
+		}
+	}
+
+	// Initialize permissions on page load
+	document.addEventListener('DOMContentLoaded', function() {
+		const roleSelect = document.querySelector('select[name="role"]');
+		if (roleSelect) {
+			updatePermissions(roleSelect.value);
+		}
+	});
 </script>
 </body>
 </html>

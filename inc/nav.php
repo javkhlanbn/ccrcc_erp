@@ -4,9 +4,15 @@
 <h4><?php echo isset($_SESSION['full_name']) ? $_SESSION['full_name'] : '@'.$_SESSION['username']; ?></h4>
 			</div>
 			
-			<?php 
+			<?php
+			   // Get current user permissions for conditional menu items
+			   include_once "DB_connection.php";
+			   include_once "app/Model/User.php";
+			   $current_user = get_user_by_id($conn, $_SESSION['id']);
+			   $can_view_all_time = $current_user && ($current_user['can_view_all_time'] ?? 0);
 
-			   if($_SESSION['role'] == "employee"){
+			   // Show admin navigation for admins, managers, or users with view permissions
+			   if($_SESSION['role'] == "employee" && !$can_view_all_time){
 			 ?>
 			 <!-- Employee Navigation Bar -->
 			<ul id="navList">
@@ -114,6 +120,7 @@
 					   <span id="chatNotification" class="notification-badge" style="display: none;"></span>
 				   </a>
 			   </li>
+			   <?php if ($_SESSION['role'] == 'admin' || $_SESSION['role'] == 'manager' || $can_view_all_time): ?>
 			   <li>
 				   <a href="admin-time-tracking.php" class="<?php if(basename($_SERVER['PHP_SELF'])=='admin-time-tracking.php') echo 'active'; ?>">
 					   <i class="fa fa-clock-o" aria-hidden="true"></i>
@@ -124,6 +131,13 @@
 				   <a href="admin-weekly-reports.php" class="<?php if(basename($_SERVER['PHP_SELF'])=='admin-weekly-reports.php') echo 'active'; ?>">
 					   <i class="fa fa-calendar-week" aria-hidden="true"></i>
 					   <span>7 хоногийн тайлан</span>
+				   </a>
+			   </li>
+			   <?php endif; ?>
+			   <li>
+				   <a href="time-tracking.php" class="<?php if(basename($_SERVER['PHP_SELF'])=='time-tracking.php') echo 'active'; ?>">
+					   <i class="fa fa-clock-o" aria-hidden="true"></i>
+					   <span>Цагийн бүртгэл</span>
 				   </a>
 			   </li>
 			   <li>
