@@ -293,6 +293,63 @@ $time_entries = $stmt->fetchAll();
             align-items: center;
             gap: 8px;
         }
+
+        /* Edit Modal Form Styling */
+        #editModal .form-group {
+            margin-bottom: 15px;
+        }
+
+        #editModal label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #333;
+        }
+
+        #editModal input[type="date"],
+        #editModal input[type="time"],
+        #editModal select,
+        #editModal textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        #editModal input:focus,
+        #editModal select:focus,
+        #editModal textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        #editModal select {
+            background: white;
+            cursor: pointer;
+        }
+
+        #editModal textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        #editModal .filter-btn {
+            background: #007bff;
+            color: #fff;
+            font-weight: 600;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        #editModal .filter-btn:hover {
+            background: #0056b3;
+        }
     </style>
 </head>
 <body class="body">
@@ -372,7 +429,7 @@ $time_entries = $stmt->fetchAll();
             <div class="entries-section">
                 <div class="section-header">
                     <h3><i class="fa fa-clock-o"></i> Цагийн бүртгэлийн түүх (<?= $total_days ?> өдөр)</h3>
-                    <a href="#" class="add-entry-btn" onclick="alert('Шинэ бүртгэл нэмэх функц удахгүй нэмэгдэнэ')">
+                    <a href="#" class="add-entry-btn" onclick="addNewEntry()">
                         <i class="fa fa-plus"></i> Шинэ бүртгэл
                     </a>
                 </div>
@@ -456,18 +513,240 @@ $time_entries = $stmt->fetchAll();
         <?php endif; ?>
         </div>
     </div>
-    
+
+    <!-- Edit Modal -->
+    <div id="editModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+        <div style="background-color: white; margin: 5% auto; padding: 20px; border-radius: 10px; width: 90%; max-width: 500px;">
+            <span style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;" onclick="document.getElementById('editModal').style.display='none'">&times;</span>
+            <h3>Цагийн бүртгэл засах</h3>
+            <div id="editForm">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Entry Modal -->
+    <div id="addModal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="document.getElementById('addModal').style.display='none'">&times;</span>
+    <h3>Шинэ цагийн бүртгэл нэмэх</h3>
+    <form id="addEntryForm">
+      <input type="hidden" name="user_id" value="<?= $user_id ?>">
+      <div class="form-group">
+        <label for="add_date">Огноо:</label>
+        <input type="date" id="add_date" name="date" value="<?= date('Y-m-d') ?>" required>
+      </div>
+      <div class="form-group">
+        <label for="add_start_time">Эхлэх цаг:</label>
+        <input type="time" id="add_start_time" name="start_time" value="09:00" required>
+      </div>
+      <div class="form-group">
+        <label for="add_end_time">Дуусах цаг:</label>
+        <input type="time" id="add_end_time" name="end_time" value="18:00" required>
+      </div>
+      <div class="form-group">
+        <label for="add_notes">Тэмдэглэл:</label>
+        <textarea id="add_notes" name="notes"></textarea>
+      </div>
+      <button type="submit" class="filter-btn">Нэмэх</button>
+    </form>
+  </div>
+</div>
+<style>
+    /* Modal background */
+#addModal {
+  display: none; /* эхлээд нуух */
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+}
+
+/* Modal box */
+#addModal .modal-content {
+  background: #fff;
+  margin: 5% auto;
+  padding: 25px 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  animation: fadeIn 0.3s ease;
+}
+
+/* Close button */
+#addModal .close-btn {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+#addModal .close-btn:hover {
+  color: #333;
+}
+
+/* Form styling */
+#addModal .form-group {
+  margin-bottom: 15px;
+}
+
+#addModal label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+}
+
+#addModal input[type="date"],
+#addModal input[type="time"],
+#addModal textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+#addModal input:focus,
+#addModal textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Button */
+#addModal .filter-btn {
+  background: #007bff;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+#addModal .filter-btn:hover {
+  background: #0056b3;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(-10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+</style>
+
     <script>
         function editEntry(entryId) {
-            // TODO: Цагийн бүртгэл засах modal харуулах
-            alert('Цагийн бүртгэл засах функц удахгүй нэмэгдэнэ. Entry ID: ' + entryId);
+            // Fetch entry data via AJAX and show in modal form for editing
+            fetch('app/get-time-entry.php?id=' + entryId)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const entry = data.entry;
+                        const modal = document.getElementById('editModal');
+                        const editForm = document.getElementById('editForm');
+                        editForm.innerHTML = `
+                            <form id="editEntryForm">
+                                <input type="hidden" name="entry_id" value="${entry.id}">
+                                <div class="form-group">
+                                    <label for="edit_date">Огноо:</label>
+                                    <input type="date" id="edit_date" name="date" value="${entry.date}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_start_time">Эхлэх цаг:</label>
+                                    <input type="time" id="edit_start_time" name="start_time" value="${entry.start_time}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_end_time">Дуусах цаг:</label>
+                                    <input type="time" id="edit_end_time" name="end_time" value="${entry.end_time}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_status">Төлөв:</label>
+                                    <select id="edit_status" name="status" required>
+                                        <option value="completed" ${entry.status === 'completed' ? 'selected' : ''}>Дууссан</option>
+                                        <option value="in_progress" ${entry.status === 'in_progress' ? 'selected' : ''}>Явж байна</option>
+                                        <option value="break" ${entry.status === 'break' ? 'selected' : ''}>Завсарлага</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_notes">Тэмдэглэл:</label>
+                                    <textarea id="edit_notes" name="notes">${entry.notes || ''}</textarea>
+                                </div>
+                                <button type="submit" class="filter-btn">Хадгалах</button>
+                            </form>
+                        `;
+                        modal.style.display = 'block';
+
+                        document.getElementById('editEntryForm').addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            const formData = new FormData(this);
+                            fetch('app/update-time-entry.php', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(res => res.json())
+                            .then(resData => {
+                                alert(resData.message);
+                                if (resData.success) {
+                                    modal.style.display = 'none';
+                                    location.reload();
+                                }
+                            })
+                            .catch(() => alert('Алдаа гарлаа. Дахин оролдоно уу.'));
+                        });
+                    } else {
+                        alert('Цагийн бүртгэл олдсонгүй.');
+                    }
+                })
+                .catch(() => alert('Алдаа гарлаа. Дахин оролдоно уу.'));
         }
         
         function deleteEntry(entryId) {
             if (confirm('Энэ цагийн бүртгэлийг устгахдаа итгэлтэй байна уу?')) {
-                // TODO: Цагийн бүртгэл устгах
-                alert('Цагийн бүртгэл устгах функц удахгүй нэмэгдэнэ. Entry ID: ' + entryId);
+                fetch('app/delete-time-entry.php?id=' + entryId, {
+                    method: 'DELETE'
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    if (data.success) {
+                        location.reload();
+                    }
+                })
+                .catch(() => alert('Алдаа гарлаа. Дахин оролдоно уу.'));
             }
+        }
+
+        function addNewEntry() {
+            const modal = document.getElementById('addModal');
+            modal.style.display = 'block';
+
+            document.getElementById('addEntryForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                fetch('app/add-time-entry.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(resData => {
+                    alert(resData.message);
+                    if (resData.success) {
+                        modal.style.display = 'none';
+                        location.reload();
+                    }
+                })
+                .catch(() => alert('Алдаа гарлаа. Дахин оролдоно уу.'));
+            });
         }
         
         // Хуудас ачааллагдахад огнооны утгыг сонгох

@@ -1,10 +1,12 @@
-<?php 
+<?php
 session_start();
 if (isset($_SESSION['role']) && isset($_SESSION['id']) && $_SESSION['role'] == "employee") {
 
 if (isset($_POST['start_date']) && isset($_POST['reason']) && isset($_POST['leave_type'])) {
     include "../DB_connection.php";
     include "Model/LeaveRequest.php";
+
+
 
     function validate_input($data) {
       $data = trim($data);
@@ -15,9 +17,9 @@ if (isset($_POST['start_date']) && isset($_POST['reason']) && isset($_POST['leav
 
     $leave_type = validate_input($_POST['leave_type']);
     $start_date = validate_input($_POST['start_date']);
-    $end_date = isset($_POST['end_date']) ? validate_input($_POST['end_date']) : null;
-    $start_time = isset($_POST['start_time']) ? validate_input($_POST['start_time']) : null;
-    $end_time = isset($_POST['end_time']) ? validate_input($_POST['end_time']) : null;
+    $end_date = !empty($_POST['end_date']) ? validate_input($_POST['end_date']) : null;
+    $start_time = !empty($_POST['start_time']) ? validate_input($_POST['start_time']) : null;
+    $end_time = !empty($_POST['end_time']) ? validate_input($_POST['end_time']) : null;
     $reason = validate_input($_POST['reason']);
     $employee_id = $_SESSION['id'];
 
@@ -45,11 +47,18 @@ if (isset($_POST['start_date']) && isset($_POST['reason']) && isset($_POST['leav
         }
         
         $data = array($employee_id, $leave_type, $start_date, $end_date, $start_time, $end_time, $reason);
-        submit_leave_request_extended($conn, $data);
-
-        $em = "Чөлөөний хүсэлт амжилттай илгээгдлээ";
-        header("Location: ../leave-request.php?success=$em");
-        exit();
+        try {
+            submit_leave_request_extended($conn, $data);
+            $em = "Чөлөөний хүсэлт амжилттай илгээгдлээ";
+            header("Location: ../leave-request.php?success=$em");
+            exit();
+        } catch (Exception $e) {
+            // Log the error
+            error_log("Leave request submission error: " . $e->getMessage(), 3, "../logs/error.log");
+            $em = "Алдаа гарлаа: " . $e->getMessage();
+            header("Location: ../leave-request.php?error=$em");
+            exit();
+        }
     }
 }else {
    $em = "Бүх талбаруудыг бөглөнө үү";
